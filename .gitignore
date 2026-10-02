@@ -1,0 +1,17 @@
+# Build output
+build/
+cmake-build-*/
+
+# Simulation output (regenerate with ProjectProgram)
+surfCovTot*.txt
+surfCovO*.txt
+surfCovCO*.txt
+carbonFlux*.txt
+langmuir_verification.txt
+figures/
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+__pycache__/
