@@ -7,7 +7,7 @@ for the oxidation of carbon by atomic oxygen on a 2D lattice of adsorption sites
 steady-state surface coverage and carbon oxidation probability as functions of surface
 temperature and incident oxygen flux, and includes a prototype FPGA design that targets roughly
 200× acceleration of the per-site update.
-
+### * This is a polished version of the project. Some minor improvements and improvements are done using Claude based on the original source code and presentation. The work used in the course project is in directory Model2021*
 *Course project for MSE 485: Atomistic Scale Simulations, University of Illinois Urbana-Champaign
 (Fall 2021). Authors: Kaan Kirmanoglu and Kevin Palani.*
 
