@@ -1,74 +1,55 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
+#include <cstdlib>
 #include "src/solver.h"
 #include "src/engine.h"
 
-bool tempCases(double temp);
-
-int main() {
-
-    std::vector<double> temps;
-    temps.clear();
-    for (int i =0; i<11; i++){
-        temps.push_back(1000+100*i);
+template <typename T>
+static void writeSeries(const std::string& filename, const std::vector<T>& data) {
+    std::ofstream file(filename);
+    for (const T& value : data) {
+        file << value << "\n";
     }
-    for (int c =0; c<temps.size(); c++){
-        tempCases(temps[c]);
-    }
+}
 
+static bool tempCase(double temp, int particle_flux, int time_steps);
+
+// Usage: ProjectProgram [particle_flux] [time_steps]
+// Sweeps T = 1000-2000 K and writes one set of output files per temperature.
+int main(int argc, char* argv[]) {
+    const int particle_flux = (argc > 1) ? std::atoi(argv[1]) : 50;
+    const int time_steps    = (argc > 2) ? std::atoi(argv[2]) : 8500;
+
+    for (int i = 0; i < 11; i++){
+        tempCase(1000.0 + 100.0*i, particle_flux, time_steps);
+    }
 
     return 0;
 }
 
-bool tempCases(double temp){
+static bool tempCase(double temp, int particle_flux, int time_steps){
 
-    // Constructing Inputs
+    // Constructing inputs
     solver_inputs inputs;
-    inputs.temperature = temp; //K
+    inputs.temperature = temp; // K
     inputs.surface_size_X = 220;
     inputs.surface_size_Y = 220;
-    inputs.particle_flux = 50;
-    inputs.time_step_size = 1e-6;
-    inputs.time_step_no = 8500;
+    inputs.particle_flux = particle_flux; // O atoms per time step
+    inputs.time_step_size = 1e-6;         // s
+    inputs.time_step_no = time_steps;
 
-    // Initializing solver with inputs
+    // Initializing solver with inputs and running the simulation
     Solver solver(inputs);
-    // Executing simulation with given inputs
     solver.execute();
- // Writing values to the txt files so we can post process data in MATLAB
-    std::ofstream surfCovFile;
-    std::string filename1 = "surfCovTot" + std::to_string((int) temp) +".txt";
-    surfCovFile.open(filename1);
-    for (double ti : solver.surface_cov){
-        surfCovFile<<ti<<"\n";
-    }
-    surfCovFile.close();
 
-    std::ofstream surfCovOFile;
-    std::string filename2 = "surfCovO" + std::to_string((int) temp) +".txt";
-    surfCovOFile.open(filename2);
-    for (double ti : solver.surf_O){
-        surfCovOFile<<ti<<"\n";
-    }
-    surfCovOFile.close();
-
-    std::ofstream surfCovCOFile;
-    std::string filename3 = "surfCovCO" + std::to_string((int) temp) +".txt";
-    surfCovCOFile.open(filename3);
-    for (double ti : solver.surf_CO){
-        surfCovCOFile<<ti<<"\n";
-    }
-    surfCovCOFile.close();
-
-    std::ofstream carbRemFile;
-    std::string filename4 = "carbonFlux" + std::to_string((int) temp) +".txt";
-    carbRemFile.open(filename4);
-    for (double ti : solver.carbonflux){
-        carbRemFile<<ti<<"\n";
-    }
-    carbRemFile.close();
+    // One value per time step, read by postprocess.py
+    const std::string T = std::to_string(static_cast<int>(temp));
+    writeSeries("surfCovTot" + T + ".txt", solver.surface_cov);
+    writeSeries("surfCovO"   + T + ".txt", solver.surf_O);
+    writeSeries("surfCovCO"  + T + ".txt", solver.surf_CO);
+    writeSeries("carbonFlux" + T + ".txt", solver.carbonflux);
 
     return true;
-
 }
